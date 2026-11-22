@@ -1,0 +1,49 @@
+FAMILY TUTOR — КРАТКАЯ ИНСТРУКЦИЯ ДЛЯ ОТЦА (Ubuntu)
+====================================================
+
+1) Распаковать каталог FamilyTutor_Final на Ubuntu.
+2) Если хотите сохранить старые задания из Windows:
+   выключить Windows-бота; скопировать старые .env и data/ в каталог проекта.
+3) В каталоге проекта:
+   sudo bash install_ubuntu.sh
+   sudo nano /opt/family-tutor/.env
+4) В .env указать TELEGRAM_BOT_TOKEN.
+   РЕКОМЕНДУЕМЫЙ ВАРИАНТ, если на Pro 200 активен бонус API-кредитов:
+   BACKEND=openai_api
+   API_MODEL=gpt-4.1-mini
+   OPENAI_API_KEY=sk-...   (включить бонус в ChatGPT Settings -> Billing)
+   Не подключать платный billing/auto recharge, если не хотите доплат.
+
+   АЛЬТЕРНАТИВА ЧЕРЕЗ CODEX CLI (экспериментальная, проверяйте условия):
+   BACKEND=codex
+   sudo npm install -g @openai/codex@latest
+   sudo -u tutorbot -H codex login --device-auth
+   sudo -u tutorbot -H codex login status
+   Действие отца: авторизовать вход самому, не передавать логин ребёнку.
+
+5) Проверить модель ДО запуска Telegram:
+   sudo -u tutorbot -H /opt/family-tutor/.venv/bin/python /opt/family-tutor/smoke_test.py --backend openai_api
+   (или --backend codex)
+6) Запустить сервер:
+   sudo systemctl start family-tutor
+   sudo systemctl status family-tutor --no-pager
+   sudo journalctl -u family-tutor -n 80 --no-pager
+
+РОЛИ: секретные PARENT_PAIR_CODE/STUDENT_PAIR_CODE/TESTER_PAIR_CODE берите из .env.
+/pair parent КОД — отец @username_parent
+/pair student КОД — ученик @username_student
+/pair tester КОД — разработчик/тестировщик @username_tester
+
+Команды отца: /new ТЕКСТ, фото, /publish, /tasks, /report ID, /evidence ID,
+/approve ID, /retry ID, /delete ID, /health
+Команды ученика: /tasks, /select ID, собственный текст/фото, /done
+
+ПОЛЕЗНО ЗНАТЬ:
+- Не запускать два Telegram-процесса с одинаковым токеном одновременно.
+- Telegram username можно менять; права определяются числовым ID.
+- По фото невозможно достоверно выявить ИИ-авторство. Родитель утверждает работу.
+- Модель не способна гарантировать 100% предотвращение списывания.
+- НИКОГДА не публиковать .env, токены, auth.json, базу или фотографии ребёнка.
+- Подписка Pro не равна API; проверить бонус API-кредитов отдельно.
+
+Полная документация: README.md; безопасность: SECURITY.md.
