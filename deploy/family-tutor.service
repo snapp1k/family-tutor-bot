@@ -1,0 +1,29 @@
+[Unit]
+Description=Family Tutor Telegram Bot
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=tutorbot
+Group=tutorbot
+WorkingDirectory=/opt/family-tutor
+Environment=PYTHONUNBUFFERED=1
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+ExecStart=/opt/family-tutor/.venv/bin/python /opt/family-tutor/bot.py
+Restart=on-failure
+RestartSec=8
+TimeoutStopSec=45
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=false
+ReadWritePaths=/opt/family-tutor/data /home/tutorbot
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target
