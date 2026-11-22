@@ -1,0 +1,31 @@
+# Secrets and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+.codex/
+auth.json
+
+# Local student data and uploads
+data/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+*.db
+backups/
+*.tar.gz
+
+# Python / IDE / tooling
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.py[cod]
+*.log
+.DS_Store
+.vscode/
+.idea/
