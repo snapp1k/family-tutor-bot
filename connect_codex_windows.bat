@@ -18,13 +18,15 @@ if errorlevel 1 (
   goto :fail
 )
 echo [1/3] Checking ChatGPT login...
-call codex login status
+".venv\Scripts\python.exe" windows_preflight.py --codex-login
 if errorlevel 1 (
   echo No active Codex login. Opening the ChatGPT login...
   call codex login
   if errorlevel 1 goto :fail
+  ".venv\Scripts\python.exe" windows_preflight.py --codex-login
+  if errorlevel 1 goto :fail
 )
-echo [2/3] Running a safe tutor test before switching the bot...
+echo [2/3] Running a real tutor test before switching the bot...
 ".venv\Scripts\python.exe" smoke_test.py --backend codex
 if errorlevel 1 (
   echo [ERROR] Codex test did not pass. The bot backend was NOT changed.
