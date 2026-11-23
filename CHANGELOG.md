@@ -1,3 +1,11 @@
+## 2026-11-23 — Windows Codex launcher
+
+- Единый `START_WINDOWS_CODEX.bat`: сохраняет `.env`/`data`, подключает Codex после пробного запроса.
+- Исправлено окружение Windows: `USERPROFILE`, `APPDATA`, `LOCALAPPDATA`, `SYSTEMROOT`, `PATHEXT` теперь доступны процессу Codex.
+- Telegram-токены, API-ключи и секретные коды по-прежнему не передаются процессу Codex.
+- Повторный запуск не расходует лимит на лишний пробный запрос. `TEST_CODEX_WINDOWS.bat` запускает проверку по запросу.
+- Проверка конфигурации и CLI: `windows_preflight.py`. Smoke-test прекращает установку при небезопасном fallback.
+
 # Changes 2026-11-22 — FamilyTutor Final
 
 - Investigated source of the repeated message: `enforce_decision()` returned identical boilerplate for most outputs lacking `?`, exceeding a fixed size or containing `x = number`.
