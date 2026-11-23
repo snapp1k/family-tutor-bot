@@ -23,6 +23,8 @@ def main():
                                         student_images=[args.image] if args.image else [])
     except EngineError as exc:
         p.exit(2, 'MODEL ERROR: '+str(exc)+'\n')
+    if args.backend != 'mock' and not result.model_used:
+        p.exit(3, 'MODEL ERROR: Codex responded, but two tutoring responses failed the safety checks. Backend was NOT switched.\n')
     print('Tutor reply:',result.reply)
     print('Mode:',args.backend,'; flag:',result.flag,'; mastery:',result.mastery)
     print('Parent note:',result.parent_note)
