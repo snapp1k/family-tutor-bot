@@ -6,6 +6,11 @@ if not exist ".venv\Scripts\python.exe" (
    pause
    exit /b 1
 )
+".venv\Scripts\python.exe" windows_preflight.py --config
+if errorlevel 1 (
+  pause
+  exit /b 1
+)
 ".venv\Scripts\python.exe" bot.py
 if errorlevel 1 (
   echo Bot stopped with an error. Review .env, Codex login status or Ollama.
