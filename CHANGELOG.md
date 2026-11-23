@@ -1,10 +1,10 @@
 ## 2026-11-23 — Windows Codex launcher
 
-- Единый `START_WINDOWS_CODEX.bat`: сохраняет `.env`/`data`, подключает Codex после пробного запроса.
-- Исправлено окружение Windows: `USERPROFILE`, `APPDATA`, `LOCALAPPDATA`, `SYSTEMROOT`, `PATHEXT` теперь доступны процессу Codex.
-- Telegram-токены, API-ключи и секретные коды по-прежнему не передаются процессу Codex.
-- Повторный запуск не расходует лимит на лишний пробный запрос. `TEST_CODEX_WINDOWS.bat` запускает проверку по запросу.
-- Проверка конфигурации и CLI: `windows_preflight.py`. Smoke-test прекращает установку при небезопасном fallback.
+- Новый единый `START_WINDOWS_CODEX.bat` для Windows, сохраняющий `.env`/`data` и включающий Codex только после реального пробного запроса; при первой настройке `.env` создаётся с `BACKEND=mock` и переключается после теста.
+- Исправлена проблема потери ChatGPT-авторизации на Windows из-за очистки переменных `USERPROFILE`, `APPDATA`, `LOCALAPPDATA`, `SYSTEMROOT`, `PATHEXT` при вызове дочернего процесса.
+- Секреты BotFather и коды привязки по-прежнему не передаются в Codex.
+- Повторный запуск избегает лишнего тестового расхода лимита Codex. Для принудительного теста добавлен `TEST_CODEX_WINDOWS.bat`.
+- Предпроверка `.env` и CLI — `windows_preflight.py`; дымовой тест теперь сообщает ошибку, если модель вернула лишь безопасную запасную фразу.
 
 # Changes 2026-11-22 — FamilyTutor Final
 
@@ -18,3 +18,11 @@
 - Added 34 automated offline tests (storage, ID auth, anti-loop, explicit answer gate, API construction, Codex isolation, Telegram role flows).
 
 **Validation scope:** local static compilation, Shell syntax checks, tests and demo smoke test. Live Telegram, father's ChatGPT subscription and Ubuntu service/network cannot be validated without credentials and access to his VM.
+
+## 2026-11-23 — Windows launcher diagnostic hotfix
+
+- Исправлено мгновенное закрытие окна `START_WINDOWS_CODEX.bat`: запуск выполняется через постоянную оболочку `cmd /K` и оставляет видимым любое сообщение об ошибке.
+- Добавлены проверки полного извлечения ZIP, Python 3.10+, состояния виртуального окружения и зависимостей.
+- Добавлен `windows_launcher.py`: проверка `.env` отдельным процессом (без устаревшего состояния конфигурации), Codex login, одноразовый тест и запуск Telegram.
+- Секреты, переписка и фото не записываются в `data/logs/windows_startup.log`; сохраняются только этапы и статусы.
+- При ошибке или штатной остановке окно остаётся открытым; запуск не обещает, что модель или Telegram доступны без проверки на конкретном ПК.
