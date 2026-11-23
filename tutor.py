@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import sys
 import subprocess
 import tempfile
 import urllib.error
@@ -195,13 +196,30 @@ class MockBackend:
                 'parent_note': 'Демо-режим: работа моделью не проверялась.'}
 
 
-class CodexBackend:
-    """Experimental Codex CLI bridge. Father logs in *as the service account*.
+def codex_subprocess_env(*, windows: bool | None = None) -> dict[str, str]:
+    """Keep the OS profile needed by Codex but never Telegram/API secrets."""
+    if windows is None:
+        windows = sys.platform == 'win32'
+    allowed = {
+        'PATH', 'HOME', 'USER', 'LOGNAME', 'LANG', 'LC_ALL',
+        'LC_CTYPE', 'TMPDIR', 'XDG_CONFIG_HOME', 'XDG_CACHE_HOME',
+        'CODEX_HOME', 'SSL_CERT_FILE', 'SHELL', 'TERM',
+    }
+    if windows:
+        allowed.update({
+            'PATHEXT', 'SYSTEMROOT', 'WINDIR', 'COMSPEC', 'USERPROFILE',
+            'HOMEDRIVE', 'HOMEPATH', 'APPDATA', 'LOCALAPPDATA',
+            'PROGRAMDATA', 'TEMP', 'TMP', 'USERNAME',
+        })
+    return {name: value for name, value in os.environ.items() if name in allowed}
 
-    The ChatGPT Pro subscription is NOT equivalent to API credit or account sharing.
-    Prefer OpenAIAPIBackend for an application serving other people.
+
+class CodexBackend:
+    """Experimental Codex CLI bridge using the user's ChatGPT CLI login.
+
+    This is not an OpenAI API key; Codex/ChatGPT subscription limits apply.
     """
-    def __init__(self, executable: str = 'codex', timeout: int = 150, model: str = ''):
+    def __init__(self, executable: str = 'codex', timeout: int = 240, model: str = ''):
         self.executable = shutil.which(executable) or executable
         self.timeout, self.model = timeout, model
 
@@ -219,12 +237,8 @@ class CodexBackend:
             for path in images[:6]:
                 cmd += ['--image', str(Path(path).resolve())]
             cmd.append('-')
-            # Fail-closed environment allowlist: never pass BotFather token, role codes,
-            # API keys or other service secrets to the Codex child process.
-            allowed_env = {'PATH', 'HOME', 'USER', 'LOGNAME', 'LANG', 'LC_ALL',
-                           'LC_CTYPE', 'TMPDIR', 'XDG_CONFIG_HOME', 'XDG_CACHE_HOME',
-                           'CODEX_HOME', 'SSL_CERT_FILE', 'SHELL', 'TERM'}
-            env = {key: value for key, value in os.environ.items() if key in allowed_env}
+            # Provide the OS profile for CLI auth while excluding all app secrets.
+            env = codex_subprocess_env()
             try:
                 auth = subprocess.run([self.executable, 'login', 'status'],
                                       text=True, capture_output=True, env=env,
