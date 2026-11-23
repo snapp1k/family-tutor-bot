@@ -6,6 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 from dotenv import load_dotenv
+from tutor import codex_subprocess_env
 
 ROOT = Path(__file__).resolve().parent
 load_dotenv(ROOT/'.env')
@@ -24,8 +25,7 @@ if backend == 'codex':
     found = shutil.which('codex')
     print('Codex found on service PATH:',bool(found),found or '')
     if found:
-        allow = {'PATH','HOME','USER','LOGNAME','LANG','LC_ALL','CODEX_HOME','XDG_CONFIG_HOME'}
-        env = {key: value for key, value in os.environ.items() if key in allow}
+        env = codex_subprocess_env()
         try:
             r=subprocess.run([found,'login','status'],capture_output=True,text=True,timeout=12,env=env)
             print('ChatGPT login valid:',r.returncode==0 and 'chatgpt' in (r.stdout+r.stderr).lower())
