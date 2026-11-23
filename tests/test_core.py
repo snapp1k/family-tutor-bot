@@ -12,7 +12,7 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from storage import Storage
 from tutor import (Tutor, MockBackend, CodexBackend, OpenAIAPIBackend, EngineError,
-                   UnsafeReply, detect_attempt, enforce_decision, make_prompt,
+                   UnsafeReply, detect_attempt, enforce_decision, make_prompt, codex_subprocess_env,
                    too_similar, contextual_fallback)
 
 
@@ -212,6 +212,40 @@ class AdapterTest(unittest.TestCase):
         self.assertNotIn('CODEX_API_KEY',calls[1][1]['env'])
         self.assertNotIn('TELEGRAM_BOT_TOKEN',calls[1][1]['env'])
         self.assertNotIn('PARENT_PAIR_CODE',calls[1][1]['env'])
+    def test_windows_profile_does_not_forward_bot_tokens(self):
+        values = {
+            'USERPROFILE': r'C:\Users\Me',
+            'APPDATA': r'C:\Users\Me\AppData\Roaming',
+            'LOCALAPPDATA': r'C:\Users\Me\AppData\Local',
+            'PATHEXT': '.EXE;.CMD',
+            'TELEGRAM_BOT_TOKEN': 'secret',
+            'OPENAI_API_KEY': 'secret',
+            'PARENT_PAIR_CODE': 'secret',
+        }
+        with patch.dict(os.environ, values, clear=True):
+            safe = codex_subprocess_env(windows=True)
+        for name in ('USERPROFILE', 'APPDATA', 'LOCALAPPDATA', 'PATHEXT'):
+            self.assertIn(name, safe)
+        for name in ('TELEGRAM_BOT_TOKEN', 'OPENAI_API_KEY', 'PARENT_PAIR_CODE'):
+            self.assertNotIn(name, safe)
+
+    def test_codex_uses_windows_profile_for_subprocesses(self):
+        backend = CodexBackend()
+        calls = []
+        def fake_run(cmd, **kw):
+            calls.append((cmd, kw))
+            if cmd[1:] == ['login','status']:
+                return SimpleNamespace(returncode=0, stdout='Logged in using ChatGPT', stderr='')
+            Path(cmd[cmd.index('--output-last-message') + 1]).write_text(
+                json.dumps(response('Начни с известных данных.')))
+            return SimpleNamespace(returncode=0)
+        with patch.dict(os.environ, {'USERPROFILE': r'C:\Users\Me', 'TELEGRAM_BOT_TOKEN':'secret'}):
+            with patch('tutor.sys.platform','win32'), patch('tutor.subprocess.run', side_effect=fake_run):
+                backend.ask('Tutor prompt', [])
+        self.assertEqual(calls[0][1]['env']['USERPROFILE'], r'C:\Users\Me')
+        self.assertEqual(calls[1][1]['env']['USERPROFILE'], r'C:\Users\Me')
+        self.assertNotIn('TELEGRAM_BOT_TOKEN', calls[1][1]['env'])
+
     def test_codex_denies_api_key_auth(self):
         b=CodexBackend()
         with patch('tutor.subprocess.run',return_value=SimpleNamespace(returncode=0,stdout='Logged in using an API key',stderr='')):
