@@ -9,7 +9,7 @@ else:
     items = [
         '# НЕ выкладывайте этот файл и не отправляйте никому!\n',
         'TELEGRAM_BOT_TOKEN=PASTE_TOKEN_HERE\n',
-        'BACKEND=mock\n',
+        'BACKEND=codex\n',
         'OPENAI_API_KEY=\n',
         'API_MODEL=gpt-4.1-mini\n',
         'MAX_DAILY_TURNS=60\n',
