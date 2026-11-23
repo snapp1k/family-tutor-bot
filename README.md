@@ -1,5 +1,13 @@
 # Family Tutor — финальная семейная версия (Windows → Ubuntu VM)
 
+> **Windows launcher hotfix (2026-11-23):** `START_WINDOWS_CODEX.bat` now
+> opens a persistent diagnostic console (`cmd /K`) and calls
+> `windows_launcher.py`. If startup fails, the window stays open and a
+> secret-free stage/status log is written to `data/logs/windows_startup.log`.
+> Fully extract the ZIP; never start the BAT inside ZIP preview. Keep
+> your existing `.env` and `data/` when updating an installation.
+
+
 **Версия:** 2026-11-22, anti-loop v2 / Pro-credit-ready.
 
 Бот предназначен для одного родителя, одного ученика и одного доверенного тестировщика. Родитель публикует задания, ребёнок присылает мысли и фото, репетитор даёт небольшие объяснения и вопросы. Родитель получает результаты, видит наблюдаемые попытки запросить готовые ответы, просматривает фотографии и сам принимает работу. «Определить по фото, писал ли человек с ИИ» достоверно невозможно; модель не должна заявлять обратное.
