@@ -1,3 +1,5 @@
+Windows quick start: read WINDOWS_CODEX_RU.md and run START_WINDOWS_CODEX.bat. No paid API key is needed for Codex CLI test.
+
 FAMILY TUTOR — КРАТКАЯ ИНСТРУКЦИЯ ДЛЯ ОТЦА (Ubuntu)
 ====================================================
 
